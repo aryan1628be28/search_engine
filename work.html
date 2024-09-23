@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Engine</title>
+    <!-- Font Awesome CDN for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Common styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            position: relative;
+        }
+
+        .container {
+            text-align: center;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        input[type="text"] {
+            width: 70%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        /* Day mode styles */
+        body.day-mode {
+            background-color: #f4f4f4;
+        }
+
+        .container.day-mode {
+            background-color: white;
+            color: black;
+        }
+
+        li.day-mode {
+            background-color: #e9ecef;
+        }
+
+        button.day-mode {
+            background-color: #28a745;
+            color: white;
+        }
+
+        button.day-mode:hover {
+            background-color: #218838;
+        }
+
+        #clearHistoryBtn.day-mode {
+            background-color: #dc3545;
+        }
+
+        #clearHistoryBtn.day-mode:hover {
+            background-color: #c82333;
+        }
+
+        /* Night mode styles */
+        body.night-mode {
+            background-color: #121212;
+        }
+
+        .container.night-mode {
+            background-color: #333;
+            color: white;
+        }
+
+        li.night-mode {
+            background-color: #444;
+        }
+
+        button.night-mode {
+            background-color: #28a745;
+            color: white;
+        }
+
+        button.night-mode:hover {
+            background-color: #218838;
+        }
+
+        #clearHistoryBtn.night-mode {
+            background-color: #dc3545;
+        }
+
+        #clearHistoryBtn.night-mode:hover {
+            background-color: #c82333;
+        }
+
+        /* Toggle Button */
+        #toggleModeBtn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: transparent;
+            color: #007bff;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        #toggleModeBtn:hover {
+            color: #0056b3;
+        }
+    </style>
+</head>
+<body class="day-mode">
+    <div class="container day-mode">
+        <h1>Simple Search Engine</h1>
+
+        <!-- Search Input Field -->
+        <input type="text" id="searchInput" placeholder="Enter search term...">
+
+        <!-- Search Button -->
+        <button id="searchBtn" class="day-mode">Search</button>
+
+        <!-- Clear History Button -->
+        <button id="clearHistoryBtn" class="day-mode">Clear History</button>
+
+        <!-- Search History Section -->
+        <h2>Search History</h2>
+        <ul id="searchHistory" class="day-mode"></ul>
+    </div>
+
+    <!-- Toggle Day/Night Mode Button (Icon) -->
+    <button id="toggleModeBtn"><i class="fas fa-moon"></i></button>
+
+    <script>
+        // Get elements from the DOM
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+        const toggleModeBtn = document.getElementById('toggleModeBtn');
+        const searchHistoryList = document.getElementById('searchHistory');
+        const body = document.body;
+        const container = document.querySelector('.container');
+        const icon = toggleModeBtn.querySelector('i');
+
+        // Initialize search history from localStorage
+        let searchHistory = JSON.parse(localStorage.getItem('searchHistory')) || [];
+        let isNightMode = JSON.parse(localStorage.getItem('nightMode')) || false;
+
+        // Function to display search history
+        function displaySearchHistory() {
+            searchHistoryList.innerHTML = '';  // Clear existing history display
+
+            searchHistory.forEach((term) => {
+                const li = document.createElement('li');
+                li.textContent = term;
+                li.classList.add(isNightMode ? 'night-mode' : 'day-mode');
+                searchHistoryList.appendChild(li);
+            });
+        }
+
+        // Function to add a new search term
+        function addSearchTerm(term) {
+            if (term) {
+                searchHistory.push(term);  // Add new term to the history
+                localStorage.setItem('searchHistory', JSON.stringify(searchHistory));  // Save history to localStorage
+                displaySearchHistory();  // Update the display
+            }
+        }
+
+        // Event listener for the search button
+        searchBtn.addEventListener('click', () => {
+            const searchTerm = searchInput.value.trim();  // Get input value
+            addSearchTerm(searchTerm);  // Add term to history
+            searchInput.value = '';  // Clear the search field
+        });
+
+        // Event listener for the clear history button
+        clearHistoryBtn.addEventListener('click', () => {
+            searchHistory = [];  // Clear history array
+            localStorage.setItem('searchHistory', JSON.stringify([]));  // Clear from localStorage
+            displaySearchHistory();  // Update the display
+        });
+
+        // Event listener for toggle day/night mode
+        toggleModeBtn.addEventListener('click', () => {
+            isNightMode = !isNightMode;  // Toggle mode
+            localStorage.setItem('nightMode', JSON.stringify(isNightMode));  // Save mode in localStorage
+
+            if (isNightMode) {
+                body.classList.add('night-mode');
+                body.classList.remove('day-mode');
+                container.classList.add('night-mode');
+                container.classList.remove('day-mode');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            } else {
+                body.classList.add('day-mode');
+                body.classList.remove('night-mode');
+                container.classList.add('day-mode');
+                container.classList.remove('night-mode');
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            }
+
+            displaySearchHistory();  // Update the list for correct mode
+        });
+
+        // Initial display of search history and mode when page loads
+        if (isNightMode) {
+            body.classList.add('night-mode');
+            body.classList.remove('day-mode');
+            container.classList.add('night-mode');
+            container.classList.remove('day-mode');
+            icon.classList.remove('fa-moon');
+            icon.classList.add('fa-sun');
+        } else {
+            body.classList.add('day-mode');
+            body.classList.remove('night-mode');
+            container.classList.add('day-mode');
+            container.classList.remove('night-mode');
+            icon.classList.add('fa-moon');
+        }
+
+        displaySearchHistory();
+    </script>
+</body>
+</html>
